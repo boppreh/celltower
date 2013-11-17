@@ -1,3 +1,5 @@
+import random
+
 class Call(object):
 	nextId = 1
 
@@ -24,3 +26,38 @@ class CallEvent(object):
 		self.call = call
 		self.time = time
 		self.type_ = type_
+
+def make_events():
+	events = []
+	max_calls = 1000
+	max_duration = 500
+	min_duration = 100
+	mean_interval = 10
+	interval_range = 5
+	chance_tower_change = 0.5
+
+	time = 0
+
+	for i in range(max_calls):
+		random_duration = min_duration + random.random() * (max_duration - min_duration)
+		random_selected_tower = random.choice(Tower.all)
+		random_distance = random.random() * (interval_range * 2) - interval_range + mean_interval
+		changed = random.random() < chance_tower_change
+		tower2 = None
+
+		if changed:
+			tower2 = random.choice(random_selected_tower.neighbors)
+
+		call = Call(random_duration, random_selected_tower, tower2)
+
+		events.append(CallEvent(call, time, CallEvent.START_CALL))
+		events.append(CallEvent(call, time + random_duration, CallEvent.END_CALL))
+
+		if changed:
+			events.append(CallEvent(call, time + random_duration / 2, CallEvent.TOWER_CHANGE))
+
+		time += random_distance
+
+	events.sort(key=lambda e: e.timelist.)
+
+	return events
