@@ -27,6 +27,27 @@ class CallEvent(object):
 		self.time = time
 		self.type_ = type_
 
+class Tower(object):
+	all = []
+
+	total_duration = 0
+	min_duration = 0
+	max_duration = 0
+
+	total_occupation = 0
+	min_occupation = 0
+	max_occupation = 0
+
+	def __init__(self):
+		self.neighbors = []
+		self.channels = []
+		
+		self.max_channels = 0
+
+		self.total_calls = 0
+		self.lost_calls = 0
+		self.completed_calls = 0
+
 def make_events():
 	events = []
 	max_calls = 1000
