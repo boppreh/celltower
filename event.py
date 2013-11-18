@@ -47,7 +47,7 @@ class Tower(object):
         self.neighbors = []
         self.channels = []
         
-        self.max_channels = 10
+        self.max_channels = 100
 
         self.total_calls = 0
         self.lost_calls = 0
@@ -179,4 +179,19 @@ if __name__ == '__main__':
     while events:
         processor.next_event()
 
+    total_calls = t1.total_calls + t2.total_calls
+    def stat(partial_calls):
+        return '{} ({}%)'.format(partial_calls, int(partial_calls * 100 / total_calls))
+
     print('Total calls:', t1.total_calls + t2.total_calls)
+    print('Completed calls:', stat(t1.completed_calls + t2.completed_calls))
+    print('Lost calls:', stat(t1.lost_calls + t2.lost_calls))
+    print('Left calls:', stat(t3.lost_calls))
+    print()
+    print('Min duration:', int(Tower.min_duration), 'min')
+    print('Mean duration:', int(Tower.total_duration / total_calls), 'min')
+    print('Max duration:', int(Tower.max_duration), 'min')
+    print()
+    print('Min occupation:', int(Tower.min_duration), 'min')
+    print('Mean occupation:', int(Tower.total_duration / total_calls), 'min')
+    print('Max occupation:', int(Tower.max_duration), 'min')
