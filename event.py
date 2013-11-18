@@ -14,7 +14,7 @@ class Call(object):
         self.failed = False
         self.active_tower = None
 
-    def fail_connection(tower):
+    def fail_connection(self, tower):
         self.failed = True
         self.active_tower = tower
 
@@ -31,12 +31,16 @@ class CallEvent(object):
 class Tower(object):
     all = []
 
+    num_drop = 0.15
+    num_change = 0.25
+    num_interval = 25
+
     total_duration = 0
-    min_duration = 0
+    min_duration = float('inf')
     max_duration = 0
 
     total_occupation = 0
-    min_occupation = 0
+    min_occupation = float('inf')
     max_occupation = 0
 
     def __init__(self):
@@ -50,13 +54,13 @@ class Tower(object):
         self.completed_calls = 0
 
     def add_neighbors(self, *towers):
-        self.neighbors.extend(tower)
+        self.neighbors.extend(towers)
 
     def add_call(self, call):
-        if self.channels >= self.max_channels:
+        if len(self.channels) >= self.max_channels:
             return False
 
-        channels.append(call)
+        self.channels.append(call)
         call.active_tower = self
         return True
 
@@ -67,7 +71,7 @@ class Tower(object):
         self.channels.remove(call)
         call.active_tower = None
         
-    def generate_events(num_calls, events):
+    def generate_events(self, num_calls, events):
         time = 0
 
         for i in range(num_calls):
@@ -75,14 +79,14 @@ class Tower(object):
             tower2 = None
 
             chance = random.random() * 100
-            if chance < self.num_drop:
+            if chance < Tower.num_drop:
                 self.tower2 = self.neighbors[1]
-            elif chance < self.num_drop + self.num_change:
+            elif chance < Tower.num_drop + Tower.num_change:
                 self.tower2 = self.neighbors[0]
 
             call = Call(duration, self, tower2)
             events.append(CallEvent(call, time, CallEvent.START_CALL))
-            if self.tower2:
+            if call.tower2:
                 events.append(CallEvent(call, time + call.duration / 2, CallEvent.TOWER_CHANGE))
             events.append(CallEvent(call, time + call.duration, CallEvent.END_CALL))
             time += self.interval_distribution()
@@ -94,13 +98,14 @@ class Tower(object):
         return -math.log(random.random()) * 25
 
 class EventProcessor(object):
-    def __init__(self, events):
+    def __init__(self, events, towers):
         self.events = events
         self.time = 0
+        self.towers = towers
 
     def next_event(self):
         if not self.events:
-            return
+            raise Exception
 
         event = self.events.pop(0)
         self.update_occupation(event.time - self.time)
@@ -119,7 +124,7 @@ class EventProcessor(object):
         time = event.time
         call = event.call
 
-        if event.type == CallEvent.START_CALL:
+        if event.type_ == CallEvent.START_CALL:
             call.tower.total_calls += 1
 
             if not self.transfer_call(call, call.tower):
@@ -127,7 +132,7 @@ class EventProcessor(object):
 
             self.update_call_duration(call)
 
-        elif event.type == CallEvent.END_CALL:
+        elif event.type_ == CallEvent.END_CALL:
             if call.failed:
                 return
 
@@ -135,7 +140,7 @@ class EventProcessor(object):
             call.active_tower.completed_calls += 1
             call.active_tower.remove_call(call)
             
-        elif event.type == CallEvent.TOWER_CHANGE:
+        elif event.type_ == CallEvent.TOWER_CHANGE:
             if call.failed:
                 return
 
@@ -157,4 +162,21 @@ class EventProcessor(object):
         return False
 
 if __name__ == '__main__':
-    pass
+    t1 = Tower()
+    t2 = Tower()
+    t3 = Tower()
+    Tower.all = [t1, t2, t3]
+    t1.add_neighbors(t2, t3);
+    t2.add_neighbors(t1, t3);
+    t3.add_neighbors(t1, t2);
+
+    events = []
+    t1.generate_events(1000 // 2, events)
+    t2.generate_events(1000 // 2, events)
+    events.sort(key=lambda e: e.time)
+
+    processor = EventProcessor(events, Tower.all)
+    while events:
+        processor.next_event()
+
+    print('Total calls:', t1.total_calls + t2.total_calls)
