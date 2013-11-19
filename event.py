@@ -1,11 +1,17 @@
 import random
 import math
 import sys
-MAX_CHANNELS = sys.argv[2]
-CALL_MAX_DURATION = sys.argv[3]
-MAX_INTERVAL = sys.argv[4]
-CHANGE_CHANCE = sys.argv[5]
-DROP_CHANCE = sys.argv[6]
+
+if len(sys.argv) < 6:
+    print('Needs at least 5 parameters:')
+    print('max_channels, call_max_duration, max_interval, change_chance and drop_chance')
+    exit()
+    
+MAX_CHANNELS = sys.argv[1]
+CALL_MAX_DURATION = sys.argv[2]
+MAX_INTERVAL = sys.argv[3]
+CHANGE_CHANCE = sys.argv[4]
+DROP_CHANCE = sys.argv[5]
 
 class Call(object):
     nextId = 1
