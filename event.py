@@ -1,5 +1,11 @@
 import random
 import math
+import sys
+MAX_CHANNELS = sys.argv[2]
+CALL_MAX_DURATION = sys.argv[3]
+MAX_INTERVAL = sys.argv[4]
+CHANGE_CHANCE = sys.argv[5]
+DROP_CHANCE = sys.argv[6]
 
 class Call(object):
     nextId = 1
@@ -31,10 +37,6 @@ class CallEvent(object):
 class Tower(object):
     all = []
 
-    num_drop = 0.15
-    num_change = 0.25
-    num_interval = 25
-
     total_duration = 0
     min_duration = float('inf')
     max_duration = 0
@@ -47,7 +49,7 @@ class Tower(object):
         self.neighbors = []
         self.channels = []
         
-        self.max_channels = 100
+        self.max_channels = MAX_CHANNELS
 
         self.total_calls = 0
         self.lost_calls = 0
@@ -79,9 +81,9 @@ class Tower(object):
             tower2 = None
 
             chance = random.random() * 100
-            if chance < Tower.num_drop:
+            if chance < DROP_CHANCE:
                 self.tower2 = self.neighbors[1]
-            elif chance < Tower.num_drop + Tower.num_change:
+            elif chance < DROP_CHANCE + CHANGE_CHANCE:
                 self.tower2 = self.neighbors[0]
 
             call = Call(duration, self, tower2)
@@ -92,10 +94,10 @@ class Tower(object):
             time += self.interval_distribution()
 
     def interval_distribution(self):
-        return -math.log(random.random()) * Tower.num_interval
+        return -math.log(random.random()) * MAX_INTERVAL
 
     def duration_distribution(self):
-        return -math.log(random.random()) * 25
+        return -math.log(random.random()) * CALL_MAX_DURATION
 
 class EventProcessor(object):
     def __init__(self, events, towers):
