@@ -9,9 +9,11 @@ def run(max_channels, call_max_duration, max_interval, change_chance, drop_chanc
     return float(re.search(r'Lost calls: \d+ \((\d+)%\)', output).groups()[0])
 
 test_values = [[10, 25, 50], [1, 5, 20], [1, 5, 20], [0, 0.2, 0.4], [0, 0.2, 0.4]]
+replications = 2
 with open('results.csv', 'w') as output:
     output.write('max_channels,call_max_duration,max_interval,change_chance,drop_chance,calls_dropped\n')
-    for args in product(*test_values):
-        result = run(*args)
-        output.write(','.join(map(str, args + (result,))) + '\n')
-        print(args, result)
+    for i in range(replications):
+        for args in product(*test_values):
+            result = run(*args)
+            output.write(','.join(map(str, args + (result,))) + '\n')
+            print(args, result)

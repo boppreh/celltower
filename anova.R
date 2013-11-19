@@ -1,0 +1,8 @@
+results <- read.table("./results.csv", header=TRUE, sep=",", na.strings="NA", dec=".", strip.white=TRUE)
+results$fac_call_max_duration <- as.factor(results$call_max_duration)
+results$fac_change_chance <- as.factor(results$change_chance)
+results$fac_drop_chance <- as.factor(results$drop_chance)
+results$fac_max_channels <- as.factor(results$max_channels)
+results$fac_max_interval <- as.factor(results$max_interval)
+anova <- (lm(calls_dropped ~ fac_call_max_duration*fac_change_chance*fac_drop_chance*fac_max_channels*fac_max_interval, data=results))
+Anova(anova)
